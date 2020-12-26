@@ -1,0 +1,40 @@
+- hosts: Webservers
+  tasks:
+  - name: "Install httpd"
+    package:
+     name: httpd
+     state: present
+  
+  - name: "Installing php"
+    package:
+            name: php
+            state: present
+
+  - name: "Copying web pages to the /var/www/html/"
+    copy:
+         src: /root/load/index.php
+         dest: /var/www/html
+
+
+  - name: "starting service of httpd"
+    service:
+            name: httpd
+            state: restarted
+
+- hosts: HaproxyLb
+  tasks:
+  - name: "Install haproxy"
+    package: 
+       name: haproxy
+       state: present
+
+  - name: "copying haproxy file to the /etc/haproxy/haproxy.cfg"
+    template:
+            src: /root/load/haproxy.cfg
+            dest: /etc/haproxy/haproxy.cfg
+    notify: lb restart
+  handlers:
+  - name: lb restart
+    service:
+            name: haproxy
+            state: restarted
